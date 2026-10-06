@@ -1,0 +1,630 @@
+// Production Prisma Schema for Valpar v0.4 (B2C Mobile + Admin CMS + B2B Partner Portal)
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum UserRole {
+  CONSUMER
+  BUSINESS_USER
+  VALPAR_ADMIN
+}
+
+enum BusinessRole {
+  OWNER
+  MANAGER
+  STAFF
+}
+
+enum PublicationStatus {
+  DRAFT
+  PUBLISHED
+  PAUSED
+  ARCHIVED
+}
+
+enum VerificationStatus {
+  UNVERIFIED
+  REVIEWED
+  VERIFIED
+}
+
+enum DataSource {
+  MANUAL_VALPAR
+  RESTAURANT_PROVIDED
+  PUBLIC_SOURCE
+  USER_SUBMITTED
+  API_IMPORT
+  SEED_DEVELOPMENT
+}
+
+enum CheckInMethod {
+  NFC
+  QR
+}
+
+enum CheckInValidationStatus {
+  VERIFIED
+  FLAGGED_DISTANCE
+  EXPIRED_TOKEN
+  RATE_LIMITED
+}
+
+enum OrderStatus {
+  CREATED
+  PREPARING
+  READY
+  DELIVERED
+  PAID
+  CANCELLED
+}
+
+enum OrderSource {
+  VALPAR_INTERNAL
+  EXTERNAL_POS
+}
+
+enum LoyaltyTier {
+  BRONCE
+  PLATA
+  ORO
+  VIP_PORTEÑO
+}
+
+enum WhatsAppStatus {
+  QUEUED
+  SENT
+  DELIVERED
+  READ
+  FAILED
+}
+
+enum EventType {
+  VISIT_CREATED
+  FIRST_VISIT_COMPLETED
+  ORDER_PAID
+  CUSTOMER_INACTIVE
+  BIRTHDAY_UPCOMING
+  REWARD_UNLOCKED
+}
+
+model User {
+  id                 String               @id @default(uuid())
+  name               String
+  email              String               @unique
+  phone              String?              @unique
+  passwordHash       String?
+  googleId           String?              @unique
+  role               UserRole             @default(CONSUMER)
+  avatarUrl          String?
+  pointsBalance      Int                  @default(0)
+  passportLevel      String               @default("Explorador Porteño")
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+
+  customerProfile    CustomerProfile?
+  partnerMemberships PartnerMember[]
+  checkIns           CheckIn[]
+  visits             Visit[]
+  placeReviews       PlaceReview[]
+  dishReviews        DishReview[]
+  recommendations    Recommendation[]
+  pointTransactions  PointTransaction[]
+  favorites          Favorite[]
+  skippedPlaces      PlaceSkipped[]
+  auditLogs          AuditLog[]
+}
+
+// RESTAURANTE SOCIO (BUSINESS PARTNER B2B)
+model BusinessPartner {
+  id                 String               @id @default(uuid())
+  name               String
+  taxId              String?              // RUT en Chile
+  planTier           String               @default("PARTNER_PRO")
+  createdAt          DateTime             @default(now())
+
+  members            PartnerMember[]
+  places             Place[]
+  customers          CustomerProfile[]
+  welcomeRewards     WelcomeReward[]
+  automations        AutomationRule[]
+  campaigns          Campaign[]
+  nfcTags            NfcTag[]
+  auditLogs          AuditLog[]
+}
+
+model PartnerMember {
+  id                 String               @id @default(uuid())
+  partnerId          String
+  userId             String
+  role               BusinessRole         @default(OWNER)
+  status             String               @default("ACTIVE") // ACTIVE, INVITED, SUSPENDED
+
+  partner            BusinessPartner      @relation(fields: [partnerId], references: [id])
+  user               User                 @relation(fields: [userId], references: [id])
+
+  @@unique([partnerId, userId])
+}
+
+enum PlaceStatus {
+  DISCOVERED
+  RECOMMENDED
+  PARTNER
+}
+
+enum InteractionType {
+  PLACE_VIEWED
+  PLACE_OPENED
+  PLACE_SAVED
+  PLACE_SKIPPED
+  PLACE_SHARED
+  DIRECTIONS_REQUESTED
+}
+
+model Place {
+  id                 String               @id @default(uuid())
+  partnerId          String?              // Optional: Null if DISCOVERED/RECOMMENDED non-partner
+  status             PlaceStatus          @default(DISCOVERED)
+  publicationStatus  PublicationStatus    @default(DRAFT)
+  verificationStatus VerificationStatus   @default(UNVERIFIED)
+  dataSource         DataSource           @default(MANUAL_VALPAR)
+  
+  name               String
+  slug               String?              @unique
+  tagline            String?
+  description        String?
+  shortDescription   String?
+  category           String
+  subCategory        String?
+  categories         String[]             @default([])
+  tags               String[]             @default([])
+  imageUrl           String?
+  coverPhoto         String?
+  gallery            String[]             @default([])
+  
+  // Real Ratings (NULL if no reviews exist)
+  rating             Float?
+  editorialScore     Float?
+  reviewCount        Int                  @default(0)
+  verifiedVisits     Int                  @default(0)
+  priceLevel         String?              @default("$$")
+  
+  address            String
+  street             String?
+  district           String               // Comuna / Cerro / Sector
+  commune            String?
+  city               String
+  region             String               @default("Valparaíso")
+  country            String               @default("Chile")
+  latitude           Float
+  longitude          Float
+  zone               String?
+  openingHours       String?
+  phone              String?
+  publicEmail        String?
+  website            String?
+  instagram          String?
+  facebook           String?
+  tiktok             String?
+  whatsapp           String?
+  socials            String?
+  
+  isFeatured         Boolean              @default(false)
+  isRecommended      Boolean              @default(false)
+  isActive           Boolean              @default(true)
+  currentOffer       String?
+  experienceTags     String[]             @default([])
+  
+  sourceReference    String?
+  sourceCheckedAt    DateTime?
+  lastVerifiedAt     DateTime?
+  verifiedBy         String?
+  createdBy          String?
+  updatedBy          String?
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @default(now()) @updatedAt
+
+  partner            BusinessPartner?     @relation(fields: [partnerId], references: [id])
+  nfcTags            NfcTag[]
+  products           Product[]
+  visits             Visit[]
+  placeReviews       PlaceReview[]
+  dishReviews        DishReview[]
+  recommendations    Recommendation[]
+  rewards            Reward[]
+  welcomeRewards     WelcomeReward[]
+  favorites          Favorite[]
+  skippedBy          PlaceSkipped[]
+  changeLogs         PlaceChangeLog[]
+  media              PlaceMedia[]
+  interactionEvents  PlaceInteractionEvent[]
+}
+
+model PlaceMedia {
+  id                 String               @id @default(uuid())
+  placeId            String
+  url                String
+  type               String               @default("IMAGE") // IMAGE, VIDEO
+  source             String               @default("OWN_VALPAR") // OWN_VALPAR, RESTAURANT_PROVIDED, PUBLIC_LICENSED, DEMO
+  altText            String?
+  sortOrder          Int                  @default(0)
+  createdAt          DateTime             @default(now())
+
+  place              Place                @relation(fields: [placeId], references: [id], onDelete: Cascade)
+}
+
+model PlaceChangeLog {
+  id                 String               @id @default(uuid())
+  placeId            String
+  actorUserId        String
+  action             String               // CREATE_PLACE, UPDATE_PLACE, PUBLISH_PLACE, ARCHIVE_PLACE, VERIFY_PLACE, LINK_PARTNER, UNLINK_PARTNER
+  changedFields      String[]
+  previousValues     String?              // JSON
+  newValues          String?              // JSON
+  createdAt          DateTime             @default(now())
+
+  place              Place                @relation(fields: [placeId], references: [id], onDelete: Cascade)
+}
+
+model Favorite {
+  id                 String               @id @default(uuid())
+  userId             String
+  placeId            String
+  createdAt          DateTime             @default(now())
+
+  user               User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  place              Place                @relation(fields: [placeId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, placeId])
+}
+
+model PlaceSkipped {
+  id                 String               @id @default(uuid())
+  userId             String
+  placeId            String
+  createdAt          DateTime             @default(now())
+
+  user               User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  place              Place                @relation(fields: [placeId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, placeId])
+}
+
+model PlaceInteractionEvent {
+  id                 String               @id @default(uuid())
+  placeId            String
+  userId             String?
+  eventType          InteractionType
+  metadata           String?
+  createdAt          DateTime             @default(now())
+
+  place              Place                @relation(fields: [placeId], references: [id])
+}
+
+// CUSTOMER PROFILE & SEPARATED EXPLICIT CONSENTS
+model CustomerProfile {
+  id                         String           @id @default(uuid())
+  partnerId                  String
+  userId                     String           @unique
+  name                       String
+  phone                      String
+  email                      String?
+  birthday                   DateTime?
+  firstVisitDate             DateTime         @default(now())
+  lastVisitDate              DateTime         @default(now())
+  totalVisits                Int              @default(1)
+  totalSpent                 Float            @default(0)
+  averageTicket              Float            @default(0)
+  loyaltyTier                LoyaltyTier      @default(BRONCE)
+  notes                      String?
+  preferences                String[]         // e.g. ["cafeteria", "mariscos", "terraza"]
+  favoritePlaces             String[]
+  tags                       String[]
+
+  partner                    BusinessPartner  @relation(fields: [partnerId], references: [id])
+  user                       User             @relation(fields: [userId], references: [id])
+  consents                   CustomerConsent[]
+  whatsappMessages           WhatsAppMessage[]
+}
+
+model CustomerConsent {
+  id                         String           @id @default(uuid())
+  customerProfileId          String
+  whatsappMarketing          Boolean          @default(true)
+  birthdayOffers             Boolean          @default(true)
+  personalizedRecommendations Boolean         @default(true)
+  visitTracking              Boolean          @default(true)
+  acceptedAt                 DateTime         @default(now())
+  revokedAt                  DateTime?
+  source                     String           @default("NFC_CHECKIN_PORTAL")
+
+  customerProfile            CustomerProfile  @relation(fields: [customerProfileId], references: [id])
+}
+
+model NfcTag {
+  id                 String               @id @default(uuid())
+  partnerId          String
+  placeId            String
+  locationLabel      String               // Entrada, Mesa 4, Barra
+  tokenSecret        String               @unique
+  status             String               @default("active")
+  dailyScansLimit    Int                  @default(200)
+  totalScans         Int                  @default(0)
+  lastScannedAt      DateTime?
+
+  partner            BusinessPartner      @relation(fields: [partnerId], references: [id])
+  place              Place                @relation(fields: [placeId], references: [id])
+  checkIns           CheckIn[]
+  visits             Visit[]
+}
+
+// HYBRID CRYPTOGRAPHIC NFC CHECKIN
+model CheckIn {
+  id                 String                  @id @default(uuid())
+  userId             String
+  nfcTagId           String
+  timestamp          DateTime                @default(now())
+  method             CheckInMethod           @default(NFC)
+  pointsAwarded      Int                     @default(100)
+  
+  // Telemetry & Cryptographic Verification
+  latitude           Float
+  longitude          Float
+  accuracyMeters     Float
+  distanceMeters     Float
+  deviceInfo         String?
+  validationStatus   CheckInValidationStatus @default(VERIFIED)
+
+  user               User                    @relation(fields: [userId], references: [id])
+  nfcTag             NfcTag                  @relation(fields: [nfcTagId], references: [id])
+  visit              Visit?
+}
+
+// CORE CENTRAL ENTITY: VISIT
+model Visit {
+  id                 String               @id @default(uuid())
+  checkInId          String               @unique
+  userId             String
+  placeId            String
+  nfcTagId           String
+  date               DateTime             @default(now())
+  status             String               @default("completed")
+  isFirstVisit       Boolean              @default(false)
+  pointsEarned       Int                  @default(100)
+  totalSpent         Float                @default(0)
+
+  checkIn            CheckIn              @relation(fields: [checkInId], references: [id])
+  user               User                 @relation(fields: [userId], references: [id])
+  place              Place                @relation(fields: [placeId], references: [id])
+  nfcTag             NfcTag               @relation(fields: [nfcTagId], references: [id])
+
+  order              Order?
+  payment            Payment?
+  placeReview        PlaceReview?
+  welcomeRedemptions WelcomeRedemption[]
+}
+
+// FIRST VISIT WELCOME REWARDS
+model WelcomeReward {
+  id                 String               @id @default(uuid())
+  partnerId          String
+  placeId            String
+  title              String
+  description        String
+  bonusPoints        Int                  @default(100)
+  giftItemName       String?
+  imageUrl           String
+  active             Boolean              @default(true)
+
+  partner            BusinessPartner      @relation(fields: [partnerId], references: [id])
+  place              Place                @relation(fields: [placeId], references: [id])
+  redemptions        WelcomeRedemption[]
+}
+
+model WelcomeRedemption {
+  id                 String               @id @default(uuid())
+  visitId            String
+  welcomeRewardId    String
+  redeemedAt         DateTime             @default(now())
+
+  visit              Visit                @relation(fields: [visitId], references: [id])
+  welcomeReward      WelcomeReward        @relation(fields: [welcomeRewardId], references: [id])
+}
+
+// RECOMENDACIONES Y VALORACIÓN DE PLATOS (PLACE & DISH REVIEWS)
+model PlaceReview {
+  id                 String               @id @default(uuid())
+  visitId            String               @unique
+  placeId            String
+  userId             String
+  rating             Int                  // 1 a 5 estrellas
+  comment            String
+  sharedToGoogle     Boolean              @default(false)
+  createdAt          DateTime             @default(now())
+
+  visit              Visit                @relation(fields: [visitId], references: [id])
+  place              Place                @relation(fields: [placeId], references: [id])
+  user               User                 @relation(fields: [userId], references: [id])
+}
+
+model DishReview {
+  id                 String               @id @default(uuid())
+  placeId            String
+  productId          String
+  userId             String
+  rating             Int                  // 1 a 5 estrellas
+  comment            String
+  createdAt          DateTime             @default(now())
+
+  place              Place                @relation(fields: [placeId], references: [id])
+  product            Product              @relation(fields: [productId], references: [id])
+  user               User                 @relation(fields: [userId], references: [id])
+}
+
+model Recommendation {
+  id                 String               @id @default(uuid())
+  placeId            String
+  userId             String
+  title              String
+  content            String
+  likesCount         Int                  @default(0)
+  createdAt          DateTime             @default(now())
+
+  place              Place                @relation(fields: [placeId], references: [id])
+  user               User                 @relation(fields: [userId], references: [id])
+}
+
+model Product {
+  id                 String               @id @default(uuid())
+  placeId            String
+  name               String
+  description        String
+  price              Float
+  category           String
+  imageUrl           String
+  available          Boolean              @default(true)
+
+  place              Place                @relation(fields: [placeId], references: [id])
+  orderItems         OrderItem[]
+  dishReviews        DishReview[]
+}
+
+model Order {
+  id                 String               @id @default(uuid())
+  visitId            String               @unique
+  placeId            String
+  customerId         String
+  subtotal           Float
+  tip                Float                @default(0)
+  total              Float
+  status             OrderStatus          @default(PAID)
+  source             OrderSource          @default(VALPAR_INTERNAL)
+  externalPosId      String?
+  paymentMethod      String               @default("webpay")
+  createdAt          DateTime             @default(now())
+
+  visit              Visit                @relation(fields: [visitId], references: [id])
+  items              OrderItem[]
+  payment            Payment?
+}
+
+model OrderItem {
+  id                 String               @id @default(uuid())
+  orderId            String
+  productId          String
+  productName        String
+  price              Float
+  quantity           Int
+
+  order              Order                @relation(fields: [orderId], references: [id])
+  product            Product              @relation(fields: [productId], references: [id])
+}
+
+model Payment {
+  id                 String               @id @default(uuid())
+  visitId            String               @unique
+  orderId            String               @unique
+  amount             Float
+  currency           String               @default("CLP")
+  provider           String               @default("WebpayPlus")
+  status             String               @default("PAID")
+  transactionId      String
+  createdAt          DateTime             @default(now())
+
+  visit              Visit                @relation(fields: [visitId], references: [id])
+  order              Order                @relation(fields: [orderId], references: [id])
+}
+
+model PointTransaction {
+  id                 String               @id @default(uuid())
+  userId             String
+  amount             Int
+  reason             String
+  description        String
+  createdAt          DateTime             @default(now())
+
+  user               User                 @relation(fields: [userId], references: [id])
+}
+
+model Reward {
+  id                 String               @id @default(uuid())
+  placeId            String
+  title              String
+  description        String
+  pointsCost         Int
+  code               String
+  imageUrl           String
+  expiresAt          DateTime
+
+  place              Place                @relation(fields: [placeId], references: [id])
+}
+
+model AutomationRule {
+  id                 String               @id @default(uuid())
+  partnerId          String
+  code               String
+  title              String
+  description        String
+  triggerEvent       EventType
+  condition          String
+  messageTemplate    String
+  enabled            Boolean              @default(true)
+  executionsCount    Int                  @default(0)
+
+  partner            BusinessPartner      @relation(fields: [partnerId], references: [id])
+}
+
+model Campaign {
+  id                 String               @id @default(uuid())
+  partnerId          String
+  title              String
+  targetSegment      String
+  messageTemplate    String
+  sentCount          Int                  @default(0)
+  openCount          Int                  @default(0)
+  conversionCount    Int                  @default(0)
+  status             String               @default("SENT")
+  createdAt          DateTime             @default(now())
+
+  partner            BusinessPartner      @relation(fields: [partnerId], references: [id])
+  messages           WhatsAppMessage[]
+}
+
+model WhatsAppMessage {
+  id                 String               @id @default(uuid())
+  customerId         String
+  campaignId         String?
+  templateId         String?
+  providerMessageId  String?
+  toPhone            String
+  senderName         String
+  content            String
+  status             WhatsAppStatus       @default(SENT)
+  sentAt             DateTime             @default(now())
+  deliveredAt        DateTime?
+  readAt             DateTime?
+  failedAt           DateTime?
+
+  customer           CustomerProfile      @relation(fields: [customerId], references: [id])
+  campaign           Campaign?            @relation(fields: [campaignId], references: [id])
+}
+
+model AuditLog {
+  id                 String               @id @default(uuid())
+  partnerId          String?
+  userId             String?
+  action             String
+  entity             String
+  entityId           String?
+  details            String
+  ipAddress          String?
+  createdAt          DateTime             @default(now())
+
+  partner            BusinessPartner?     @relation(fields: [partnerId], references: [id])
+  user               User?                @relation(fields: [userId], references: [id])
+}

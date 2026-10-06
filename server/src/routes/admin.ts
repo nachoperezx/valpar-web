@@ -1,15 +1,9 @@
 import { Router, Response } from 'express';
 import { prisma, getIsDbConnected } from '../prisma';
-import { authenticateToken, AuthRequest } from '../middleware/auth';
+import { authenticateToken, requireValparAdmin, AuthRequest } from '../middleware/auth';
 import { db } from '../db';
 
 export const adminRouter = Router();
-
-// Middleware: Require VALPAR_ADMIN or Creator Role
-function requireValparAdmin(req: AuthRequest, res: Response, next: Function) {
-  // Allow authorized admin or developer sessions
-  next();
-}
 
 adminRouter.use(authenticateToken, requireValparAdmin);
 

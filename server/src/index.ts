@@ -16,6 +16,7 @@ import { authRouter } from './routes/auth';
 import { adminRouter } from './routes/admin';
 import { businessRouter } from './routes/business';
 import { devRouter } from './routes/dev';
+import { getJwtSecret } from './config';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -48,6 +49,7 @@ app.use('/api', regionalRoutesRouter);
 app.use('/api', guidesRouter);
 
 async function startServer() {
+  getJwtSecret(); // Fail fast in production when JWT_SECRET is missing
   await checkDatabaseConnection();
   app.listen(PORT, () => {
     console.log(`🚀 Valpar Backend API Server v0.3.0 running on http://localhost:${PORT}`);

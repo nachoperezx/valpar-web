@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { AppProvider, useApp } from './context/AppContext';
-import { Navbar } from './components/Navbar';
+
 import { DashboardOverview } from './components/Merchant/DashboardOverview';
 import { CustomerCRMView } from './components/Merchant/CustomerCRM';
 import { AutomationEngine } from './components/Merchant/AutomationEngine';
@@ -8,7 +8,7 @@ import { NfcManager } from './components/Merchant/NfcManager';
 import { OrderMonitor } from './components/Merchant/OrderMonitor';
 import { WhatsAppSimulatorWidget } from './components/WhatsApp/WhatsAppSimulatorWidget';
 import { AdminPlaceCMS } from './components/Admin/AdminPlaceCMS';
-import { Store, Users, Zap, Nfc, ShoppingBag, BarChart3, Building2, Shield, Lock } from 'lucide-react';
+import { Store, Users, Zap, Nfc, ShoppingBag, BarChart3, Building2, Shield } from 'lucide-react';
 
 /**
  * ============================================================================

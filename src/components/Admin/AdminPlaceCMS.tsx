@@ -1,28 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Building2, 
-  Plus, 
-  Search, 
-  Filter, 
-  Edit3, 
-  Eye, 
-  EyeOff, 
-  Star, 
-  Award, 
-  CheckCircle, 
-  Clock, 
-  X, 
-  Save, 
-  ExternalLink,
+import {
+  Plus,
+  Search,
+  Edit3,
+  Eye,
+  EyeOff,
+  CheckCircle,
+  X,
+  Save,
   MapPin,
-  ShieldCheck,
   RefreshCw,
   AlertCircle,
   FileSpreadsheet,
-  FileText,
   Upload,
-  Phone,
-  Globe,
   CheckSquare
 } from 'lucide-react';
 

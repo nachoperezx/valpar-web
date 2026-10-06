@@ -1,4 +1,4 @@
-import { Place, PlaceCategory, NfcTag, CustomerCRM, AutomationRule, Reward, Achievement, WhatsAppMessage } from '../types';
+import { Place, PlaceCategory, NfcTag, CustomerCRM, AutomationRule, Reward, Achievement } from '../types';
 
 export const INITIAL_CATEGORIES: PlaceCategory[] = [
   { id: 'all', name: 'Todos', icon: 'Sparkles', description: 'Explora toda la Región de Valparaíso' },

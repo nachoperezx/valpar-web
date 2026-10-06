@@ -17,7 +17,6 @@ import {
 } from '../types';
 import {
   INITIAL_CATEGORIES,
-  INITIAL_PLACES,
   INITIAL_NFC_TAGS,
   INITIAL_CUSTOMERS,
   INITIAL_RULES,

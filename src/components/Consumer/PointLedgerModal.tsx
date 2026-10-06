@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useApp } from '../../context/AppContext';
-import { X, Award, ArrowUpRight, ArrowDownLeft, ShieldCheck, History } from 'lucide-react';
+import { X, ArrowUpRight, ArrowDownLeft, ShieldCheck, History } from 'lucide-react';
 import { api } from '../../services/api';
 
 interface PointLedgerModalProps {

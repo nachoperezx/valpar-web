@@ -1,3 +1,4 @@
+import { POINTS } from './config';
 // Real Relational Database Storage & Analytics Engine for Valpar Commercial MVP v1.2
 // Focused 100% on B2C Discovery + B2B Partner Portal, Hybrid NFC Anti-Fraud, WelcomeRewards & Dish Reviews
 
@@ -445,7 +446,7 @@ export const db = {
       nfcTagId: data.nfcTagId || place.nfcTagId,
       timestamp: new Date().toISOString(),
       method: 'NFC',
-      pointsAwarded: 100,
+      pointsAwarded: isFirstVisitInPlace ? POINTS.FIRST_VISIT : POINTS.RETURN_VISIT,
       latitude: data.userLat || -33.0425,
       longitude: data.userLng || -71.6256,
       accuracyMeters: 5.2,
@@ -468,7 +469,7 @@ export const db = {
       date: new Date().toLocaleString(),
       status: 'active',
       isFirstVisit: isFirstVisitInPlace,
-      pointsEarned: 100 + (isFirstVisitInPlace ? 100 : 0),
+      pointsEarned: isFirstVisitInPlace ? POINTS.FIRST_VISIT : POINTS.RETURN_VISIT,
       welcomeRewardClaimed: welcomeGift?.giftItemName
     };
 

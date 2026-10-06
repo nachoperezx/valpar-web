@@ -1,6 +1,6 @@
 import React from 'react';
 import { useApp } from '../../context/AppContext';
-import { BookOpen, Sparkles, MapPin, ArrowRight } from 'lucide-react';
+import { BookOpen, MapPin, ArrowRight } from 'lucide-react';
 import { Place } from '../../types';
 
 interface EditorialGuidesProps {

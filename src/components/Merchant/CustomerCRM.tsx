@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { CustomerCRM } from '../../types';
 import { useApp } from '../../context/AppContext';
-import { Search, Filter, Phone, Mail, Calendar, DollarSign, Award, CheckCircle2, XCircle, MessageSquare, ShieldCheck } from 'lucide-react';
+import { Search, MessageSquare } from 'lucide-react';
 
 export const CustomerCRMView: React.FC = () => {
   const { customers, sendManualWhatsApp } = useApp();

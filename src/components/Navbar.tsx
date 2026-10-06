@@ -1,6 +1,6 @@
 import React from 'react';
 import { useApp } from '../context/AppContext';
-import { Store, MessageSquare, ShieldCheck, BarChart2 } from 'lucide-react';
+import { Store, MessageSquare, ShieldCheck } from 'lucide-react';
 
 interface NavbarProps {
   onOpenSettings?: () => void;

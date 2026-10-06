@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
-import { X, ShoppingBag, CreditCard, Trash2, CheckCircle, ShieldCheck } from 'lucide-react';
+import { X, ShoppingBag, CreditCard, Trash2, CheckCircle } from 'lucide-react';
 
 interface CartAndOrderModalProps {
   onClose: () => void;

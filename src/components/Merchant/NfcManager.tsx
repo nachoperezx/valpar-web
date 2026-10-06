@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
-import { Nfc, QrCode, ShieldCheck, Plus, RefreshCw, CheckCircle2, AlertTriangle, Printer } from 'lucide-react';
+import { Nfc, QrCode, Plus, RefreshCw, CheckCircle2, Printer } from 'lucide-react';
 import { NfcTag } from '../../types';
 
 export const NfcManager: React.FC = () => {

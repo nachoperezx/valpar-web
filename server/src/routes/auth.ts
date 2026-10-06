@@ -4,15 +4,15 @@ import jwt from 'jsonwebtoken';
 import { prisma, getIsDbConnected } from '../prisma';
 import { authenticateToken, AuthRequest } from '../middleware/auth';
 import { db } from '../db';
+import { getJwtSecret, isProduction } from '../config';
 
 export const authRouter = Router();
-const JWT_SECRET = process.env.JWT_SECRET || 'valpar_jwt_secret_v0.3.0_key_regional_2026';
 
 // Helper to generate JWT Token
 function generateToken(user: { id: string; email: string; name: string; role: string }) {
   return jwt.sign(
     { id: user.id, email: user.email, name: user.name, role: user.role },
-    JWT_SECRET,
+    getJwtSecret(),
     { expiresIn: '30d' }
   );
 }
@@ -152,8 +152,11 @@ authRouter.post('/login', async (req: Request, res: Response) => {
         }
       });
     } else {
-      // In-Memory Fallback
-      if (email === 'valentina.silva@email.cl' || email.includes('@')) {
+      // In-Memory Fallback (demo only): there is no user store, so any email is accepted
+      if (isProduction()) {
+        return res.status(503).json({ success: false, message: 'Base de datos no disponible.' });
+      }
+      if (email.includes('@')) {
         const mockUser = {
           id: 'user-valpo-01',
           name: 'Valentina Silva',

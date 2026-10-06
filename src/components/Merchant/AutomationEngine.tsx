@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
-import { Zap, CheckCircle2, MessageSquare, Edit3, Save, Power, ShieldAlert, Sparkles } from 'lucide-react';
+import { Zap, CheckCircle2, MessageSquare, Edit3, Save, Power } from 'lucide-react';
 import { AutomationRule } from '../../types';
 
 export const AutomationEngine: React.FC = () => {

@@ -1,6 +1,6 @@
 import React from 'react';
-import { useApp } from '../../context/AppContext';
-import { Gift, Sparkles, CheckCircle2, Award, HeartHandshake, X } from 'lucide-react';
+
+import { Gift, Sparkles, Award, X } from 'lucide-react';
 
 interface FirstVisitWelcomeModalProps {
   placeName: string;

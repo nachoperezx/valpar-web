@@ -1,6 +1,6 @@
 import React from 'react';
 import { useApp } from '../../context/AppContext';
-import { ShoppingBag, Clock, CheckCircle2, AlertCircle, ArrowRight } from 'lucide-react';
+import { ShoppingBag } from 'lucide-react';
 import { Order } from '../../types';
 
 export const OrderMonitor: React.FC = () => {

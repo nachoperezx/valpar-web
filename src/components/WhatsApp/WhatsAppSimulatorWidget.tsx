@@ -1,6 +1,6 @@
 import React from 'react';
 import { useApp } from '../../context/AppContext';
-import { X, Send, PhoneCall, Video, CheckCheck, MessageSquare } from 'lucide-react';
+import { X, Send, CheckCheck } from 'lucide-react';
 
 export const WhatsAppSimulatorWidget: React.FC = () => {
   const { isWhatsAppOpen, setIsWhatsAppOpen, whatsappMessages, sendManualWhatsApp, user, places } = useApp();

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Landmark, Users, Nfc, DollarSign, Navigation, ShieldCheck, MapPin, TrendingUp } from 'lucide-react';
+import { Landmark, Users, Nfc, DollarSign, Navigation, ShieldCheck, MapPin } from 'lucide-react';
 import { api } from '../../services/api';
 
 export const RegionalAdminPanel: React.FC = () => {

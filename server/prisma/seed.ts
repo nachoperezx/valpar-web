@@ -1,4 +1,5 @@
 import { PrismaClient, PlaceStatus, PublicationStatus, VerificationStatus, DataSource } from '@prisma/client';
+import { randomBytes } from 'crypto';
 
 const prisma = new PrismaClient();
 
@@ -614,6 +615,23 @@ async function main() {
       where: { id: p.id },
       update: p,
       create: p
+    });
+  }
+
+  // One entrance NFC tag per partner place (check-ins require an active tag).
+  // update: {} keeps an existing tag's secret stable across re-seeds.
+  for (const p of realPlacesData) {
+    if (!p.partnerId) continue;
+    await prisma.nfcTag.upsert({
+      where: { id: `nfc-${p.id}` },
+      update: {},
+      create: {
+        id: `nfc-${p.id}`,
+        partnerId: p.partnerId,
+        placeId: p.id,
+        locationLabel: 'Entrada',
+        tokenSecret: randomBytes(32).toString('hex')
+      }
     });
   }
 

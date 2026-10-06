@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Place } from '../../types';
 import { useApp } from '../../context/AppContext';
-import { Heart, X, Eye, Star, MapPin, Sparkles, Flame, CheckCircle, RefreshCw, ChevronRight } from 'lucide-react';
+import { Heart, X, Eye, Star, MapPin, Sparkles, Flame, RefreshCw, ChevronRight } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
 interface MatchGastronomicoProps {
